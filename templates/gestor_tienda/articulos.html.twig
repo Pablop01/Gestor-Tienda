@@ -1,0 +1,227 @@
+{% extends 'base.html.twig' %} {% block body %}
+
+<body class='fondoGris'>
+
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Añadir Articulo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id='tituloModal'></p>
+                    <img id='imgModal' width='100px'>
+                    <p hidden id='idModal'></p>
+                    <input type="number" id="cantidadModal" onkeypress="return (event.charCode >= 48 && event.charCode <= 57)" value='1' min='0'>
+                    <p hidden id='errorStock' class='error'></p>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id='añadirCarrito'>Añadir al Carrito</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade modalCancelar" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Cancelar Compra</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Seguro que quieres eliminar el carrito?</p>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-primary" id='aceptarMensaje'>Sí</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade modalCarrito" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">¡Atencion!/h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>No hay articulos en el carrito</p>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+
+        <div class="input-group flex-nowrap mt-4 mb-4">
+            <span class="input-group-text" id="addon-wrapping"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+					height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+					<path
+						d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
+				</svg></span>
+            <input type="text" class="form-control buscador" placeholder="Buscar Articulo" aria-label="Username" aria-describedby="addon-wrapping">
+        </div>
+        <div class="row justify-content-center">
+            {% for key ,articulo in articulos %} {% if articulo.activo == 1 %}
+            <div class='articulo col-md-3 fondoBlanco m-3 text-center bordesRedondos' id='articulo-{{articulo.id}}'>
+                <h3 class='nombre-{{articulo.id}} mt-3'>{{articulo.nombre}}</h3>
+                <img src="data:image/png;base64,{{ images[key] }}" class='img-{{articulo.id}} img-fluid mt-0' />
+                <p>{{articulo.descripcion}}</p>
+                <p>{{articulo.precio}}€</p>
+                <p class='stock-{{articulo.id}}'>
+                    {{articulo.stock}} Unidades disponibles</p>
+            </div>
+            {% endif %} {% endfor %}
+        </div>
+        <div class='container-fluid'>
+            <div class='row justify-content-center'>
+                <button type="button" class="btn btn-danger col-3 mt-2	" id='cancelarCompra'>Cancelar compra</button>
+            </div>
+            <div class='row justify-content-center'>
+                <button type="button" class="btn btn-primary col-3 mt-2 mb-4" id='procesarCompra'>Procesar
+					compra</button>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    //window.onload = function() {  
+    $('.nav-Articulos').addClass('active');
+
+    carrito = [];
+    contador = 0;
+
+    articulos = document.getElementsByClassName('articulo');
+
+    $('.buscador').keyup(function(e) {
+        for (i = 0; i < articulos.length; i++) {
+            articulo = articulos[i];
+            selector = '.nombre-' + articulo.id.substr(9);
+
+            if (!$(selector).html().toLowerCase().includes(($('.buscador').val().toLowerCase()))) {
+                $(selector).parent().attr('hidden', true);
+            } else {
+                $(selector).parent().attr('hidden', false);
+            }
+            if ($('.buscador').val() == '') {
+                $(selector).parent().attr('hidden', false);
+            }
+        }
+    });
+
+    for (i = 0; i < articulos.length; i++) {
+        articulo = articulos[i];
+        selector = '#' + articulo.id;
+        id = articulo.id.split('-')[1];
+        selectorStock = ".stock-" + id;
+        stock = $(selectorStock).html().substr(7);
+        if (stock != 0) {
+            $(selector).attr("onclick", "pulsado(" + id + ")");
+        }
+    }
+
+    function pulsado(id) {
+
+        claseNombre = '.nombre-' + id;
+        claseImg = '.img-' + id;
+        nombre = $(claseNombre);
+        img = $(claseImg);
+        selectorStock = ".stock-" + id;
+        stock = $(selectorStock).html().substr(7);
+        $('#tituloModal').html(nombre.html());
+        $('#imgModal').attr('src', img.attr('src'));
+        $('#cantidadModal').val(1);
+        $('#idModal').html(id);
+        $('#staticBackdrop').modal('show');
+        $('#cantidadModal').attr("max", stock);
+        $('#añadirCarrito').attr("onclick", "añadirCarrito(" + id + ")");
+
+    }
+
+    function añadirCarrito(id) {
+
+        $('#errorStock').attr('hidden');
+        selectorStock = ".stock-" + id;
+        stock = parseInt($(selectorStock).html().substr(7));
+
+        if (stock < parseInt($('#cantidadModal').val())) {
+            $('#errorStock').html('No hay tantas existencias. Stock: ' + stock);
+            $('#errorStock').removeAttr('hidden');
+        } else {
+
+            if (carrito.length == 0) {
+                carrito.push([
+                    parseInt($('#idModal').html()),
+                    parseInt($('#cantidadModal').val())
+                ]);
+            }
+
+            for (i = 0; i < carrito.length; i++) {
+                if (carrito[i].indexOf(id) != -1 && contador != 0) {
+                    carrito[i][1] = parseInt(carrito[i][1]) + parseInt($('#cantidadModal').val());
+                    break;
+                } else if (i == carrito.length - 1 && contador != 0) {
+                    carrito.push([
+                        parseInt($('#idModal').html()),
+                        parseInt($('#cantidadModal').val())
+                    ]);
+                    break;
+                }
+                contador++;
+            }
+
+            $('#staticBackdrop').modal('hide');
+        }
+
+    }
+
+    $('#procesarCompra').on('click', function() {
+
+        if (carrito.length != 0) {
+
+            $.ajax({
+                type: "POST",
+                url: "{{ path('app_procesar_compra') }}",
+                data: {
+                    'datos': carrito
+                },
+                success: function(result) {
+                    console.log(result);
+                    if (result == 0) {
+                        location.href = 'verTicket';
+                    }
+                },
+                error: function(result) {
+                    console.log("error: ", result);
+                }
+            });
+        } else {
+            $('.modalCarrito').modal('show');
+
+        }
+
+    });
+
+    $('#cancelarCompra').on('click', function() {
+
+        $('.modalCancelar').modal('show');
+
+    });
+
+    $('#aceptarMensaje').on('click', function() {
+
+        location.reload();
+
+    });
+
+    //}
+</script>
+{% endblock %}

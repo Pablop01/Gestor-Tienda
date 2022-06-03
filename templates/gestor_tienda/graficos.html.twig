@@ -1,0 +1,312 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+<body class='fondoGris'>
+	<div class='container fondoBlanco'>
+		<div class='row justify-content-md-between'>
+			<div class='col-md-5 col-12 mt-4'>
+				<canvas id="myChart3" width="700" height="500"></canvas>
+			</div>
+			<div class='col-md-5 col-12 mt-md-4'>
+				<canvas id="myChart2" width="700" height="500" class='col-md-4'></canvas>
+			</div>
+		</div>
+		<div class='row justify-content-md-center'>
+			<div class='col-md-5 col-12'>
+				<canvas id="myChart" width="700" height="500" class='col-md-4'></canvas>
+			</div>
+		</div>
+</body>
+<script>
+
+	$('.nav-Dashboard').addClass('active');
+
+	$.ajax({
+		type: "POST",
+		url: "{{ path('app_get_datos_ventas') }}",
+		async: false,
+		data: {},
+		success: function (result) {
+
+			etiquetas = [];
+			datos = [];
+
+			for (var i = 0; i < result.length; i++) {
+				datos[i] = result[i].cantidad;
+				$.ajax({
+					type: "POST",
+					url: "{{ path('app_get_articulo') }}",
+					async: false,
+					data: {
+						'id': result[i].id_articulo
+					},
+					success: function (result2) {
+						etiquetas[i] = JSON.parse(result2).nombre;
+					},
+					error: function (result2) {
+						console.log("error: ", result2);
+					}
+				});
+			}
+			/* console.log(etiquetas);
+						console.log(datos); */
+			pintarGrafico(etiquetas, datos);
+
+		},
+		error: function (result) {
+			console.log("error: ", result);
+		}
+	});
+
+	$.ajax({
+		type: "POST",
+		url: "{{ path('app_get_tickets') }}",
+		data: {},
+		success: function (result3) {
+
+			etiquetas = [];
+			datos = [];
+
+			objetos = [];
+
+			var today = new Date();
+			var year = today.getFullYear();
+
+			var today = new Date();
+			var yearAnterior = today.getFullYear() - 1;
+
+			var fechas = '01/01/' + year + ' - ' + '31/12/' + year;
+			var fechasSeparadas = fechas.split(' - ');
+
+			var fechas2 = '01/01/' + yearAnterior + ' - ' + '31/12/' + yearAnterior;
+			var fechasSeparadas2 = fechas2.split(' - ');
+
+			for (var i = 0; i < result3.length; i++) { // console.log(new Date(JSON.parse(result3[i]).fecha.date));
+				objetos.push(JSON.parse(result3[i]));
+			}
+
+			// console.log(objetos);
+			datos = (contarPorMeses(objetos, fechasSeparadas));
+			datos2 = (contarPorMeses(objetos, fechasSeparadas2));
+			pintarGrafico2(datos[0], datos[1]);
+			pintarGrafico3(datos2[0], datos2[1]);
+
+			// pintarGrafico(etiquetas, datos);
+
+		},
+		error: function (result) {
+			console.log("error: ", result);
+		}
+	});
+
+
+	function pintarGrafico(etiquetasVisibles, datosVisibles) {
+
+		const ctx = document.getElementById('myChart');
+		$('#myChart').addClass('visible');
+		$('#myChart').removeClass('invisible');
+		myChart = new Chart(ctx, {
+			type: 'bar',
+			data: {
+				labels: etiquetasVisibles,
+				datasets: [
+					{
+						label: 'Top Ventas',
+						data: datosVisibles,
+						backgroundColor: [
+							'rgba(255, 99, 132, 0.6)',
+						],
+						borderColor: [
+							'rgba(255, 99, 132, 1)',
+						],
+						borderWidth: 1,
+						datalabels: {
+							formatter: function (value, context) {
+								return value;
+							},
+							color: 'black',
+							anchor: 'end',
+							align: 'top'
+						}
+					}
+				]
+			},
+			plugins: [ChartDataLabels],
+			options: {
+				responsive: true
+			}
+		});
+	}
+
+	function pintarGrafico2(etiquetasVisibles, datosVisibles) {
+
+		const ctx2 = document.getElementById('myChart2');
+		$('#myChart2').addClass('visible');
+		$('#myChart2').removeClass('invisible');
+		myChart2 = new Chart(ctx2, {
+			type: 'bar',
+			data: {
+				labels: etiquetasVisibles,
+				datasets: [
+					{
+						label: 'Facturación Año Actual',
+						data: datosVisibles,
+						backgroundColor: [
+							'rgba(255, 99, 132, 0.6)',
+						],
+						borderColor: [
+							'rgba(255, 99, 132, 1)',
+						],
+						borderWidth: 1,
+						datalabels: {
+							formatter: function (value, context) {
+								if (value != 0) {
+									return value.toLocaleString('es-ES', {
+										style: 'currency',
+										currency: 'EUR',
+										minimumFractionDigits: 2
+									});
+								} else {
+									return null
+								}
+							},
+							color: 'black',
+							anchor: 'end',
+							align: 'top'
+						}
+					}
+				]
+			},
+			plugins: [ChartDataLabels],
+			options: {
+				responsive: true
+			}
+		});
+	}
+
+
+	function pintarGrafico3(etiquetasVisibles, datosVisibles) {
+
+		const ctx3 = document.getElementById('myChart3');
+		$('#myChart3').addClass('visible');
+		$('#myChart3').removeClass('invisible');
+		myChart3 = new Chart(ctx3, {
+			type: 'bar',
+			data: {
+				labels: etiquetasVisibles,
+				datasets: [
+					{
+						label: 'Facturación Año Anterior',
+						data: datosVisibles,
+						backgroundColor: [
+							'rgba(255, 99, 132, 0.6)',
+						],
+						borderColor: [
+							'rgba(255, 99, 132, 1)',
+						],
+						borderWidth: 1,
+						datalabels: {
+							formatter: function (value, context) {
+								if (value != 0) {
+									return value.toLocaleString('es-ES', {
+										style: 'currency',
+										currency: 'EUR',
+										minimumFractionDigits: 2
+									});
+								} else {
+									return null
+								}
+							},
+							color: 'black',
+							anchor: 'end',
+							align: 'top'
+						}
+					}
+				]
+			},
+			plugins: [ChartDataLabels],
+			options: {
+				responsive: true
+			}
+		});
+	}
+
+	function contarPorMeses(result, fechasSeparadas) { // console.log(result);
+
+		var etiquetas = [
+			'Enero',
+			'Febrero',
+			'Marzo',
+			'Abril',
+			'Mayo',
+			'Junio',
+			'Julio',
+			'Agosto',
+			'Septiembre',
+			'Octubre',
+			'Noviembre',
+			'Diciembre'
+		];
+		var anyoInicio = fechasSeparadas[0].split('/')[2];
+		var anyoFin = fechasSeparadas[1].split('/')[2];
+		var fechaInicio = fechasSeparadas[0];
+		var inicio = fechaInicio.split('/')[1];
+		var fechaFin = fechasSeparadas[1];
+		var fin = fechaFin.split('/')[1];
+		var fecha1 = fechaInicio.split('/');
+		var fecha2 = fechaFin.split('/');
+		var today = new Date();
+		var year = today.getFullYear();
+		var diferenciaMeses = monthDiff(new Date(fecha1[2], fecha1[1], '01'), new Date(fecha2[2], fecha2[1], '01'));
+
+		var contador = 0;
+		var mesArray = parseInt(fecha1[1]) - 1;
+		var anyoEtiqueta = parseInt(fecha1[2]);
+		var etiquetasVisibles = [];
+		var comprobarMes = [];
+		var datos = [];
+
+		for (var i = 0; i < diferenciaMeses; i++) {
+			etiquetasVisibles[i] = etiquetas[mesArray] + " " + anyoEtiqueta;
+			comprobarMes[i] = mesArray + 1;
+			if (mesArray == 11) {
+				mesArray = -1;
+				anyoEtiqueta++;
+			}
+			mesArray++;
+			datos[i] = 0;
+		}
+
+		for (var i = 0; i < result.length; i++) {
+			for (var j = 0; j < etiquetasVisibles.length; j++) {
+
+				var fechaComprobacion1 = new Date(result[i].fecha.date.split('-')[0], result[i].fecha.date.split('-')[1], '01');
+				var fechaComprobacion2 = new Date(etiquetasVisibles[j].split(' ')[1], comprobarMes[j], '01');
+				
+				if (fechaComprobacion1.getTime() == fechaComprobacion2.getTime()) {
+
+					datos[j] += result[i].total;
+
+				}
+			}
+		}
+		return [etiquetasVisibles, datos];
+	}
+
+
+	function monthDiff(date1, date2) {
+		var year1 = date1.getFullYear();
+		var year2 = date2.getFullYear();
+		var month1 = date1.getMonth();
+		var month2 = date2.getMonth();
+		if (month1 === 0) {
+			month1++;
+			month2++;
+		}
+		var numberOfMonths = (year2 - year1) * 12 + (month2 - month1) + 1;
+		return numberOfMonths;
+	}
+</script>
+</body>
+{% endblock %}

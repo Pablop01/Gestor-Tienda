@@ -1,0 +1,113 @@
+{% extends 'base.html.twig' %} {% block body %}
+
+<body class='fondoGris'>
+
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="staticBackdropLabel">Devolver Articulo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id='tituloModal'></p>
+                    <img id='imgModal' width='100px'>
+                    <p hidden id='idModal'></p>
+                    <p hidden id='errorStock' class='error'></p>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id='devolverArticulo'>Devolver Articulo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+
+        <div class="input-group flex-nowrap mt-4 mb-4">
+            <span class="input-group-text" id="addon-wrapping"><svg xmlns="http://www.w3.org/2000/svg" width="16"
+					height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+					<path
+						d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
+				</svg></span>
+            <input type="text" class="form-control buscador" placeholder="Buscar Articulo" aria-label="Username" aria-describedby="addon-wrapping">
+        </div>
+        <div class="row justify-content-center mb-4">
+            {% for key ,articulo in articulos %} {% if articulo.activo == 1 %}
+            <div class='articulo col-md-3 fondoBlanco m-3 text-center bordesRedondos' id='articulo-{{articulo.id}}'>
+                <h3 class='nombre-{{articulo.id}} mt-3'>{{articulo.nombre}}</h3>
+                <img src="data:image/png;base64,{{ images[key] }}" class='img-{{articulo.id}} img-fluid mt-0' />
+                <p>{{articulo.descripcion}}</p>
+            </div>
+            {% endif %} {% endfor %}
+        </div>
+    </div>
+</body>
+<script>
+
+    articulos = document.getElementsByClassName('articulo');
+
+    $('.buscador').keyup(function(e) {
+        for (i = 0; i < articulos.length; i++) {
+            articulo = articulos[i];
+            selector = '.nombre-' + articulo.id.substr(9);
+
+            if (!$(selector).html().toLowerCase().includes(($('.buscador').val().toLowerCase()))) {
+                $(selector).parent().attr('hidden', true);
+            } else {
+                $(selector).parent().attr('hidden', false);
+            }
+            if ($('.buscador').val() == '') {
+                $(selector).parent().attr('hidden', false);
+            }
+        }
+    });
+
+    for (i = 0; i < articulos.length; i++) {
+        articulo = articulos[i];
+        selector = '#' + articulo.id;
+        id = articulo.id.split('-')[1];
+        $(selector).attr("onclick", "pulsado(" + id + ")");
+        
+    }
+
+    function pulsado(id) {
+
+        claseNombre = '.nombre-' + id;
+        claseImg = '.img-' + id;
+        nombre = $(claseNombre);
+        img = $(claseImg);
+        $('#tituloModal').html(nombre.html());
+        $('#imgModal').attr('src', img.attr('src'));
+        $('#cantidadModal').val(1);
+        $('#idModal').html(id);
+        $('#staticBackdrop').modal('show');
+        $('#añadirCarrito').attr("onclick", "añadirCarrito(" + id + ")");
+
+    }
+
+    $('#devolverArticulo').on('click', function(){
+        
+            $.ajax({
+                type: "POST",
+                url: "{{ path('app_procesa_devolucion') }}",
+                data: {
+                    'id': $('#idModal').html(),
+                    'ticket': {{ticket}},
+                },
+                success: function(result) {
+                    if(result == 0){
+                        location.href = 'verTicketDevuelto';
+                    }
+                    
+                },
+                error: function(result) {
+                    console.log("error: ", result);
+                }
+            });
+
+    })
+
+</script>
+{% endblock %}

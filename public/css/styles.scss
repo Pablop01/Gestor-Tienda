@@ -1,0 +1,45 @@
+$gris: #f7f7f7;
+$blanco: #fff;
+$azul: #0275d8;
+$error: #ff0000;
+.fondoGris {
+    background-color: $gris;
+}
+
+.fondoBlanco {
+    background-color: $blanco;
+}
+
+.bordesRedondos {
+    border-radius: 15px;
+}
+
+.articulo {
+    border: 2px solid $blanco;
+}
+
+.bordeAzul {
+    border: 2px solid $azul;
+}
+
+.articulo:hover {
+    //opacity: 0.5;
+    cursor: pointer;
+    border: 2px solid $azul;
+    transition: 0.4s;
+}
+
+#error {
+    color: $error;
+}
+
+.abs-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.error {
+    color: $error
+}

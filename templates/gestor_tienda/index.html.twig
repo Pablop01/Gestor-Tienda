@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+{% if is_granted('ROLE_ADMIN') %}
+				<a href="{{ path('app_registro') }}" class="col-3">
+					<div>Registrar Usuario</div>
+				</a>
+{% endif %}
+<a href="{{ path('app_nuevo_articulo') }}" class="col-3">
+					<div>Registrar Articulo</div>
+				</a>
+<a href="{{ path('app_catalogo') }}" class="col-3">
+					<div>Catálogo</div>
+				</a>
+<a href="{{ path('app_stock') }}" class="col-3">
+					<div>Añadir stock</div>
+				</a>
+<a href="{{ path('app_editar') }}" class="col-3">
+					<div>Editar articulo</div>
+				</a>
+{% endblock %}

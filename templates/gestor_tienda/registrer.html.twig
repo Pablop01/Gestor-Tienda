@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<body class='fondoGris'>
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="col-4 contenedor2 bordeAzul bordesRedondos fondoBlanco mt-5">
+				{{form_start(form)}}
+				{{form_widget(form)}}
+				{{form_end(form)}}
+				{% if error %}
+					<div class="error text-center">{{error}}</div>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+</body>
+<script>
+$('.nav-Registro').addClass('active');
+$('#registrer_save').addClass('btn btn-primary mt-4 mb-4');
+$('#registrer_save').parent().addClass('text-center');
+$('.required').addClass('mt-4');
+
+</script>
+{% endblock %}

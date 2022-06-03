@@ -1,0 +1,22 @@
+<?php //App%255CController%255CGestorTiendaController%2523a%25C3%25B1adirStock
+
+return [PHP_INT_MAX, static function () { return \Symfony\Component\VarExporter\Internal\Hydrator::hydrate(
+    $o = [
+        clone (\Symfony\Component\VarExporter\Internal\Registry::$prototypes['Symfony\\Component\\Routing\\Annotation\\Route'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('Symfony\\Component\\Routing\\Annotation\\Route')),
+    ],
+    null,
+    [
+        'Symfony\\Component\\Routing\\Annotation\\Route' => [
+            'path' => [
+                '/añadirStock',
+            ],
+            'name' => [
+                'app_añadir_stock',
+            ],
+        ],
+    ],
+    [
+        $o[0],
+    ],
+    []
+); }];

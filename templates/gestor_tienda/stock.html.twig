@@ -1,0 +1,122 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<body class='fondoGris'>
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+	aria-labelledby="staticBackdropLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="staticBackdropLabel">Añadir Stock</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<p id='tituloModal'></p>
+				<img id='imgModal' width='100px'>
+				<p hidden id='idModal'></p>
+				<input type="number" id="cantidadModal"
+					onkeypress="return (event.charCode >= 48 && event.charCode <= 57)" value='1' min='0'>
+				<p hidden id='errorStock'></p>
+
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+				<button type="button" class="btn btn-primary" id='añadirCarrito'>Añadir Stock</button>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="container">
+
+<div class="input-group flex-nowrap mt-4 mb-4">
+  <span class="input-group-text" id="addon-wrapping"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+</svg></span>
+  <input type="text" class="form-control buscador" placeholder="Buscar Articulo" aria-label="Username" aria-describedby="addon-wrapping">
+</div>
+<div class="row justify-content-center">
+{% for key ,articulo in articulos %}
+<div class='articulo col-md-3 fondoBlanco m-3 text-center bordesRedondos' id='articulo-{{articulo.id}}'>
+<p>
+
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-plus mt-4" viewBox="0 0 16 16">
+  <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+</svg>
+</p>
+	<h3 class='nombre-{{articulo.id}} mt-3'>{{articulo.nombre}}</h3>
+	<img src="data:image/png;base64,{{ images[key] }}" class='img-{{articulo.id}} img-fluid mt-0'/>
+	<p class='stock-{{articulo.id}}'>
+		{{articulo.stock}} Unidades Disponibles</p>
+</div>
+{% endfor %}
+</div>
+</body>
+<script>
+	$('.nav-Stock').addClass('active');	
+	articulos = document.getElementsByClassName('articulo');
+
+	$('.buscador').keyup(function (e) { 
+		for (i = 0; i < articulos.length; i++) {
+			articulo = articulos[i];
+			selector = '.nombre-' + articulo.id.substr(9);
+			//console.log($(selector));
+			
+				if(!$(selector).html().toLowerCase().includes(($('.buscador').val().toLowerCase()))){
+					$(selector).parent().attr('hidden',true);
+				}
+			if($('.buscador').val() == ''){
+				$(selector).parent().attr('hidden',false);
+			}
+		}
+	});
+
+	for (i = 0; i < articulos.length; i++) {
+		articulo = articulos[i];
+		selector = '#' + articulo.id;
+		id = articulo.id.split('-')[1];
+		$(selector).attr("onclick", "pulsado(" + id + ")");
+	}
+
+	function pulsado(id) {
+
+		claseNombre = '.nombre-' + id;
+		claseImg = '.img-' + id;
+		nombre = $(claseNombre);
+		img = $(claseImg);
+		selectorStock = ".stock-" + id;
+		stock = $(selectorStock).html().substr(7);
+		$('#tituloModal').html(nombre.html());
+		$('#imgModal').attr('src', img.attr('src'));
+		$('#cantidadModal').val(1);
+		$('#idModal').html(id);
+		$('#staticBackdrop').modal('show');
+		$('#cantidadModal').val();
+		$('#añadirCarrito').attr("onclick", "anyadirStock(" + id + ")");
+
+	}
+
+	function anyadirStock(id){
+	
+		$.ajax({
+			type: "POST",
+			url: "{{ path('app_añadir_stock') }}",
+			data: {
+				'id': id,
+				'stock': $('#cantidadModal').val(),
+			},
+			success: function (result) {
+				console.log(result);
+				$('#staticBackdrop').modal('hide');
+				if(result == 0){
+					location.reload();
+				}
+				
+			},
+			error: function (result) {
+				console.log("error: ", result);
+			}
+		}); 
+	}
+
+</script>
+{% endblock %}

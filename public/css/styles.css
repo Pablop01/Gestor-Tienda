@@ -1,0 +1,48 @@
+.fondoGris {
+  background-color: #f7f7f7;
+}
+
+.fondoBlanco {
+  background-color: #fff;
+}
+
+.bordesRedondos {
+  border-radius: 15px;
+}
+
+.articulo {
+  border: 2px solid #fff;
+}
+
+.bordeAzul {
+  border: 2px solid #0275d8;
+}
+
+.articulo:hover {
+  cursor: pointer;
+  border: 2px solid #0275d8;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+#error {
+  color: #ff0000;
+}
+
+.abs-center {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  min-height: 100vh;
+}
+
+.error {
+  color: #ff0000;
+}
+/*# sourceMappingURL=styles.css.map */

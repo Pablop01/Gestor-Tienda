@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<body class='fondoGris'>
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="col-4 mt-4 fondoBlanco bordesRedondos bordeAzul mb-4">
+				<form enctype="multipart/form-data" action="{{ path('app_procesa_nuevo_articulo') }}" method="POST">
+					<h2>Añadir nuevo articulo</h2>
+					<h3>Nombre:
+					</h3>
+					<input type="text" id="nombre" name="nombre" required>
+					<h3>Descripción:</h3>
+					<textarea id="descripcion" name="descripcion" required></textarea>
+					<h3>Precio Compra:</h3>
+					<input type="text" id="precio_compra" name="precio_compra" class='decimales' required>
+					<h3>Precio Base Venta:</h3>
+					<input type="text" id="precio_base" name="precio_base" class='decimales' required>
+					<h3>IVA:</h3>
+					<select id="iva" name="iva">
+						<option value="4">4%</option>
+						<option value="10">10%</option>
+						<option value="21">21%</option>
+					</select>
+					<h3>Stock:</h3>
+					<input type="text" id="stock" name="stock" onkeypress="return (event.charCode >= 48 && event.charCode <= 57)" required>
+					<h3>Foto:</h3>
+					<div>
+						<input type="file" class="form-control" id="image" name="image" multiple accept="image/*" required>
+					</div>
+					{% if error %}
+						<div class="error_registrer text-center error">{{error}}</div>
+					{% endif %}
+					<div class='text-center'>
+					<button id="boton" type="submit" class='btn btn-primary mt-4 mb-4'>Añadir</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</body>
+<script>
+$('.nav-nArticulo').addClass('active');
+$('.decimales').on('input', function () {
+  this.value = this.value.replace(/[^0-9,.]/g, '').replace(/,/g, '.');
+});
+</script>
+{% endblock %}
